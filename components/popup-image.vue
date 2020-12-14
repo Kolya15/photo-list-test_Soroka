@@ -43,15 +43,15 @@ export default {
     width: 260px;
     height: 40px;
     background: #F7F8F9;
-    border-radius: 8px;
-    padding: 4px;
+    border-radius: .8rem;
+    padding: .4rem;
     position: relative;
 
     &-src {
         width: 32px;
         height: 32px;
-        border-radius: 8px;
-        margin-right: 11px;
+        border-radius: .8rem;
+        margin-right: 1rem;
      }
 
     &-title {
@@ -59,7 +59,7 @@ export default {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        margin-right: 10px;
+        margin-right: 1rem;
     }
 
     &-icon__favourite {

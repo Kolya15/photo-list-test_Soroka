@@ -5,12 +5,14 @@
                 Фильтр:
                 <span
                     class="vendor-filter__name"
+                    :class="{'vendor-filter__active' : isAlbum}"
                     @click="selectedFilter('isAlbum', 'isFavourite')"
                 >
                     По альбомам
                 </span>
                 <span
                     class="vendor-filter__name"
+                    :class="{'vendor-filter__active' : isFavourite}"
                     @click="selectedFilter('isFavourite', 'isAlbum')"
                 >
                     Избранное
@@ -24,11 +26,12 @@
                      :key="group.group"
                 >
                     <h2>{{ group.groupName }}</h2>
-                    <div class="vendor-filter__item">
+                    <div>
                         <popup-image
                             v-for="image in group.data"
                             :key="image.id"
                             :image="image"
+                            class="vendor-filter__item"
                             @changeFavourite="saveToLocalStorage()"
                         />
                     </div>
@@ -53,9 +56,8 @@ export default {
         getFilteredPhotos() {
             if (this.isAlbum) {
                 return this.sortedByGroup(this.arrayPhotos);
-            }
-            else if (this.isFavourite) {
-                return this.sortedByGroup(this.arrayPhotos.filter(item => item.favourite), true);
+            } else if (this.isFavourite) {
+                return this.sortedByGroup(this.arrayPhotos.filter(photos => photos.favourite), true);
             } else {
                 return this.sortedByGroup(this.arrayPhotos, true);
             }
@@ -64,23 +66,23 @@ export default {
     methods: {
         sortedByGroup(arrayPhoto, sortByFirstLetter) {
             let resultArrayPhoto = []
-            arrayPhoto.forEach(item => {
-                let sortParameter = sortByFirstLetter ? item.title[0].toUpperCase() : item.albumId;
+            arrayPhoto.forEach(photo => {
+                let sortParameter = sortByFirstLetter ? photo.title[0].toUpperCase() : photo.albumId;
                 let findGroup = resultArrayPhoto.find(group => group.group === sortParameter)
                 if (findGroup) {
-                    findGroup.data.push(item)
+                    findGroup.data.push(photo)
                 } else {
                     resultArrayPhoto.push({
                         group: sortParameter,
-                        data: [item]
+                        data: [photo]
                     })
                 }
             })
-            resultArrayPhoto = resultArrayPhoto.map(item => {
+            resultArrayPhoto = resultArrayPhoto.map(photo => {
                 return {
-                    group: item.group,
-                    data: this.sortByLetter(item.data, 'title'),
-                    groupName: sortByFirstLetter ? item.group : item.data[0].title
+                    group: photo.group,
+                    data: this.sortByLetter(photo.data, 'title'),
+                    groupName: sortByFirstLetter ? photo.group : photo.data[0].title
                 }
             })
             this.saveToLocalStorage()
@@ -107,7 +109,7 @@ export default {
     async created() {
         let arrayPhotos = JSON.parse(localStorage.getItem('arrayPhotos'))
         if (arrayPhotos && arrayPhotos.length) {
-            this.arrayPhotos = arrayPhotos
+            this.arrayPhotos = arrayPhotos;
         } else {
             let allArray = await fetch('http://jsonplaceholder.typicode.com/photos').then(response => response.json())
             let uniqueAlbumId = new Set();
@@ -118,9 +120,9 @@ export default {
                     this.arrayPhotos = this.arrayPhotos.concat(allArray.filter(item => item.albumId === photo.albumId).slice(0, maxLength));
                 }
             })
-            this.arrayPhotos = this.arrayPhotos.map(item => {
+            this.arrayPhotos = this.arrayPhotos.map(photo => {
                 return {
-                    ...item,
+                    ...photo,
                     favourite: false,
                 }
             })
@@ -131,6 +133,7 @@ export default {
 </script>
 
 <style lang="scss">
+
 .vendor-filter {
     font-weight: 700;
     font-family: Open Sans, Roboto, sans-serif;
@@ -142,7 +145,16 @@ export default {
     background: #ffffff;
     border-radius: 1.2rem;
     box-sizing: border-box;
-    overflow-y: scroll;
+    overflow: hidden;
+
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+    ::-webkit-scrollbar {
+        width: 0;
+        background: transparent;
+    }
+
 
     &__header {
         margin: 0 0 1.5rem;
@@ -158,30 +170,36 @@ export default {
         margin: 0 0.5rem;
         text-decoration: underline;
         cursor: pointer;
+        padding: .5rem;
+    }
+
+    &__active {
+        color: white;
+        background-color: #545454;
+        border-radius: .5rem;
     }
 
     &__scroll-wrap {
-        overflow: hidden;
+        overflow: auto;
+        height: 100%;
     }
 
+
     &__scroll {
-        //column-count: 4;
-        //column-gap: 25px;
-        //column-fill: auto;
-        //@media (max-width: 1200px) {
-        //    column-count: 3;
-        //}
-        overflow-y: auto;
         column-count: 4;
-        column-gap: 25px;
-        @media (max-width: 1200px) {
-            column-count: 3;
-        }
+        column-gap: 50px;
     }
 
     &__list {
-        height: auto;
+        overflow: hidden;
+        -webkit-column-break-inside: avoid;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        break-inside: avoid-column;
+    }
 
+    &__item {
+        margin-top: .8rem;
     }
 }
 </style>
