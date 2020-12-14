@@ -2,7 +2,7 @@ export default {
     mode: 'spa',
 
     head: {
-        title: 'CC',
+        title: 'photo-list',
         meta: [
             { charset: 'utf-8' },
         ],
